@@ -3,6 +3,8 @@ package demo.auth.services;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,32 +26,44 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User findById(long id) {
-        // TODO Auto-generated method stub
-        return null;
+        User user = users.findById(id).get();
+        return user;
     }
 
     @Override
     public User findByUsername(String username) {
-        // TODO Auto-generated method stub
-        return null;
+        User user = users.findByUsername(username).get();
+        return user;
     }
 
+    @Transactional
     @Override
     public User save(User user) {
-        // TODO Auto-generated method stub
-        return null;
+        // TODO bcrypt password
+        String password = user.getPassword();
+        User newUser = new User(user.getUsername(), password);
+        return users.save(newUser);
     }
 
+    @Transactional
     @Override
     public void delete(long id) {
-        // TODO Auto-generated method stub
-
+        users.deleteById(id);
     }
 
+    @Transactional
     @Override
     public User update(User user, long id) {
-        // TODO Auto-generated method stub
-        return null;
+        User currentUser = users.findById(id).get();
+        if (user.getUsername() != null) {
+            currentUser.setUsername(user.getUsername());
+        }
+        if (user.getPassword() != null) {
+            // TODO bcrypt password
+            String password = user.getPassword();
+            currentUser.setPassword(password);
+        }
+        return users.save(currentUser);
     }
 
 }
