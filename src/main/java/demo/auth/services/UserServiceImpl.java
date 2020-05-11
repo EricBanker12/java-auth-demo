@@ -2,10 +2,12 @@ package demo.auth.services;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import demo.auth.models.User;
@@ -17,6 +19,9 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private UserRepository users;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @Override
     public List<User> findAll() {
         List<User> usersList = new ArrayList<>();
@@ -25,13 +30,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User findById(long id) {
+    public User findById(long id) throws NoSuchElementException {
         User user = users.findById(id).get();
         return user;
     }
 
     @Override
-    public User findByUsername(String username) {
+    public User findByUsername(String username) throws NoSuchElementException {
         User user = users.findByUsername(username).get();
         return user;
     }
@@ -39,8 +44,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Override
     public User save(User user) {
-        // TODO bcrypt password
-        String password = user.getPassword();
+        String password = passwordEncoder.encode(user.getPassword());
         User newUser = new User(user.getUsername(), password);
         return users.save(newUser);
     }
@@ -59,8 +63,7 @@ public class UserServiceImpl implements UserService {
             currentUser.setUsername(user.getUsername());
         }
         if (user.getPassword() != null) {
-            // TODO bcrypt password
-            String password = user.getPassword();
+            String password = passwordEncoder.encode(user.getPassword());
             currentUser.setPassword(password);
         }
         return users.save(currentUser);
