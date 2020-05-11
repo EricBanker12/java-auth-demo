@@ -26,8 +26,12 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         http.authorizeRequests()
             .antMatchers("/admin").hasRole("ADMIN")
             .antMatchers("/user").hasAnyRole("ADMIN", "USER")
+            .antMatchers("/h2-console/**").permitAll()
             .antMatchers("/").permitAll()
             .and().formLogin();
+        
+        http.csrf().disable();
+        http.headers().frameOptions().disable();
     }
 
     @Bean

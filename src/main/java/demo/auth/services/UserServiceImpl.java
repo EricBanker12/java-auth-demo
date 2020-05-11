@@ -2,6 +2,7 @@ package demo.auth.services;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import javax.transaction.Transactional;
 
@@ -25,13 +26,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User findById(long id) {
+    public User findById(long id) throws NoSuchElementException {
         User user = users.findById(id).get();
         return user;
     }
 
     @Override
-    public User findByUsername(String username) {
+    public User findByUsername(String username) throws NoSuchElementException {
         User user = users.findByUsername(username).get();
         return user;
     }
