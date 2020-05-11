@@ -7,6 +7,7 @@ import java.util.NoSuchElementException;
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import demo.auth.models.User;
@@ -17,6 +18,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private UserRepository users;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Override
     public List<User> findAll() {
@@ -40,8 +44,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Override
     public User save(User user) {
-        // TODO bcrypt password
-        String password = user.getPassword();
+        String password = passwordEncoder.encode(user.getPassword());
         User newUser = new User(user.getUsername(), password);
         return users.save(newUser);
     }
@@ -60,8 +63,7 @@ public class UserServiceImpl implements UserService {
             currentUser.setUsername(user.getUsername());
         }
         if (user.getPassword() != null) {
-            // TODO bcrypt password
-            String password = user.getPassword();
+            String password = passwordEncoder.encode(user.getPassword());
             currentUser.setPassword(password);
         }
         return users.save(currentUser);
