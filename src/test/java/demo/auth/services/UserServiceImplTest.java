@@ -2,6 +2,7 @@ package demo.auth.services;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.longThat;
@@ -14,9 +15,12 @@ import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import demo.auth.AuthApplication;
@@ -29,6 +33,9 @@ public class UserServiceImplTest {
 
     @MockBean
     UserRepository userRepository;
+
+    @MockBean
+    PasswordEncoder passwordEncoder;
     
     @Autowired
     UserServiceImpl userService;
@@ -98,6 +105,30 @@ public class UserServiceImplTest {
             .thenReturn(empty);
 
         assertThrows(NoSuchElementException.class, () -> userService.findByUsername("user"));
+    }
+
+    @Test
+    void saveTest() {
+        Mockito
+            .when(passwordEncoder.encode(anyString()))
+            .thenReturn("pass");
+
+        Mockito
+            .when(userRepository.save(any(User.class)))
+            .thenAnswer(new Answer<User>() {
+                @Override
+                public User answer(InvocationOnMock invocation) throws Throwable {
+                    User user = invocation.getArgument(0);
+                    user.setId(1L);
+                    return user;
+                }
+            });
+
+        User testuser = userService.save(new User("user", "raw_pass"));
+
+        assertEquals(1L, testuser.getId(), "user id is not 1");
+        assertEquals("user", testuser.getUsername(), "username is not \"user\"");
+        assertEquals("pass", testuser.getPassword(), "password is not \"pass\"");
     }
 
 }
