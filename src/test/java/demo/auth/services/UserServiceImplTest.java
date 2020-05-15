@@ -3,6 +3,7 @@ package demo.auth.services;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.longThat;
 
 import java.util.Arrays;
@@ -70,6 +71,33 @@ public class UserServiceImplTest {
             .thenReturn(empty);
 
         assertThrows(NoSuchElementException.class, () -> userService.findById(1L));
+    }
+
+    @Test
+    void findByUsernameTest() {
+        User user = new User("user", "pass");
+        user.setId(1L);
+
+        Mockito
+            .when(userRepository.findByUsername(anyString()))
+            .thenReturn(Optional.of(user));
+
+        User testuser = userService.findByUsername("user");
+
+        assertEquals(1L, testuser.getId(), "user id is not 1");
+        assertEquals("user", testuser.getUsername(), "username is not \"user\"");
+        assertEquals("pass", testuser.getPassword(), "password is not \"pass\"");
+    }
+
+    @Test
+    void findByUsername_BadIdThrowsExceptionTest() {
+        Optional<User> empty = Optional.empty();
+
+        Mockito
+            .when(userRepository.findByUsername(anyString()))
+            .thenReturn(empty);
+
+        assertThrows(NoSuchElementException.class, () -> userService.findByUsername("user"));
     }
 
 }
