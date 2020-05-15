@@ -131,4 +131,34 @@ public class UserServiceImplTest {
         assertEquals("pass", testuser.getPassword(), "password is not \"pass\"");
     }
 
+    @Test
+    void updateTest() {
+        User olduser = new User("old_user", "old_pass");
+        olduser.setId(1L);
+
+        Mockito
+            .when(userRepository.findById(longThat(id -> id == 1L)))
+            .thenReturn(Optional.of(olduser));
+
+        Mockito
+            .when(passwordEncoder.encode(anyString()))
+            .thenReturn("pass");
+
+        Mockito
+            .when(userRepository.save(any(User.class)))
+            .thenAnswer(new Answer<User>() {
+                @Override
+                public User answer(InvocationOnMock invocation) throws Throwable {
+                    User user = invocation.getArgument(0);
+                    return user;
+                }
+            });
+
+        User testuser = userService.update(new User("user", "raw_pass"), 1L);
+
+        assertEquals(1L, testuser.getId(), "user id is not 1");
+        assertEquals("user", testuser.getUsername(), "username is not \"user\"");
+        assertEquals("pass", testuser.getPassword(), "password is not \"pass\"");
+    }
+
 }
